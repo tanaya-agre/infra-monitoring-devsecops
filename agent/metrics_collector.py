@@ -1,16 +1,15 @@
 import psutil
 import socket
+import socket as sock_module
 import time
 import json
 from datetime import datetime
 
 def get_system_metrics():
-    """Collects current system health metrics and returns them as a dictionary."""
-
-    cpu_percent = psutil.cpu_percent(interval=1)          # % CPU used right now
-    memory = psutil.virtual_memory()                      # RAM stats
-    disk = psutil.disk_usage('/')                         # Disk stats for root partition
-    net = psutil.net_io_counters()                         # Network bytes sent/received
+    cpu_percent = psutil.cpu_percent(interval=1)
+    memory = psutil.virtual_memory()
+    disk = psutil.disk_usage('/')
+    net = psutil.net_io_counters()
 
     metrics = {
         "hostname": socket.gethostname(),
@@ -27,23 +26,29 @@ def get_system_metrics():
     }
     return metrics
 
-
-
 LOG_FILE = "../logs/agent_metrics.log"
 
 def log_metrics(data):
     with open(LOG_FILE, "a") as f:
         f.write(json.dumps(data) + "\n")
 
-if __name__ == "__main__":
-    while True:
-        data = get_system_metrics()
-        print(data)
-        log_metrics(data)
-        time.sleep(5)
+SERVER_HOST = "127.0.0.1"
+SERVER_PORT = 9999
+
+def send_to_server(data):
+    try:
+        client_socket = sock_module.socket(sock_module.AF_INET, sock_module.SOCK_STREAM)
+        client_socket.connect((SERVER_HOST, SERVER_PORT))
+        client_socket.sendall(json.dumps(data).encode("utf-8"))
+        client_socket.close()
+        print("Sent to server successfully.")
+    except ConnectionRefusedError:
+        print("Could not reach server — is socket_server.py running?")
 
 if __name__ == "__main__":
     while True:
         data = get_system_metrics()
         print(data)
-        time.sleep(5)   # collect every 5 seconds
+        log_metrics(data)
+        send_to_server(data)
+        time.sleep(5)
