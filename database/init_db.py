@@ -24,6 +24,18 @@ def init_db():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS alerts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            hostname TEXT,
+            timestamp TEXT,
+            metric_type TEXT,
+            metric_value REAL,
+            message TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     conn.commit()
     conn.close()
     print(f"Database initialized: {DB_FILE}")
