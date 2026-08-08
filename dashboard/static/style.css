@@ -1,0 +1,10 @@
+body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 40px; }
+h1 { color: #1a1a2e; }
+.cards { display: flex; gap: 16px; margin-bottom: 24px; }
+.card { background: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.card h3 { margin: 0 0 8px 0; font-size: 14px; color: #666; }
+.card p { margin: 0; font-size: 24px; font-weight: bold; color: #16213e; }
+table { border-collapse: collapse; width: 100%; background: white; margin-top: 20px; }
+th, td { padding: 8px 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 14px; }
+th { background: #16213e; color: white; }
+</style>

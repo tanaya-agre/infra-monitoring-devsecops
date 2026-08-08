@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DevSecOps Infrastructure Monitoring Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <h1>DevSecOps Infrastructure Monitoring Dashboard</h1>
+
+    {% if data %}
+
+    <table>
+
+        <tr>
+            <th>ID</th>
+            <th>Hostname</th>
+            <th>CPU (%)</th>
+            <th>Memory (%)</th>
+            <th>Disk (%)</th>
+            <th>Time</th>
+        </tr>
+
+        {% for row in data %}
+
+        <tr>
+            <td>{{ row.id }}</td>
+            <td>{{ row.hostname }}</td>
+            <td>{{ row.cpu }}</td>
+            <td>{{ row.memory }}</td>
+            <td>{{ row.disk }}</td>
+            <td>{{ row.time }}</td>
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+    {% else %}
+
+    <h3>No Monitoring Data Available</h3>
+
+    {% endif %}
+
+</body>
+
+</html>

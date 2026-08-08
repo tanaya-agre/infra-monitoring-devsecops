@@ -1,6 +1,7 @@
 venv/
 __pycache__/
 *.pyc
-logs/
-database/*.db
+*.log
+*.pem
 .env
+database/monitoring.db
