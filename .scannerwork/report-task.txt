@@ -1,0 +1,7 @@
+organization=tanaya-agre
+projectKey=tanaya-agre_infra-monitoring-devsecops
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.100793
+dashboardUrl=https://sonarcloud.io/dashboard?id=tanaya-agre_infra-monitoring-devsecops
+ceTaskId=AZ_my9S3BpHi4inXG6IA
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZ_my9S3BpHi4inXG6IA

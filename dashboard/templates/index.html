@@ -1,49 +1,222 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>DevSecOps Infrastructure Monitoring Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Infrastructure Monitoring Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background-color: #f5f6fa;
+            color: #222;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #eee;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Alert Popup */
+        #alertBox {
+            display: none;
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            width: 380px;
+            padding: 20px;
+            background-color: white;
+            border-left: 6px solid #e74c3c;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            z-index: 9999;
+        }
+
+        #alertBox h2 {
+            margin-top: 0;
+            color: #e74c3c;
+        }
+
+        #alertMessage {
+            white-space: pre-line;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        #closeAlert {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #closeAlert:hover {
+            opacity: 0.85;
+        }
+
+        .network-value {
+            font-size: 13px;
+        }
+    </style>
 </head>
 
 <body>
 
-    <h1>DevSecOps Infrastructure Monitoring Dashboard</h1>
+    <h1>Infrastructure Monitoring Dashboard</h1>
 
-    {% if data %}
+    <!-- Alert Popup -->
+    <div id="alertBox">
 
+        <h2>🚨 Anomaly Detected</h2>
+
+        <p id="alertMessage">
+            Checking for alerts...
+        </p>
+
+        <button id="closeAlert" onclick="closeAlert()">
+            Close
+        </button>
+
+    </div>
+
+
+    <!-- Metrics Table -->
     <table>
 
-        <tr>
-            <th>ID</th>
-            <th>Hostname</th>
-            <th>CPU (%)</th>
-            <th>Memory (%)</th>
-            <th>Disk (%)</th>
-            <th>Time</th>
-        </tr>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Hostname</th>
+                <th>CPU (%)</th>
+                <th>Memory (%)</th>
+                <th>Disk (%)</th>
+                <th>Network Sent</th>
+                <th>Network Received</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
 
-        {% for row in data %}
+        <tbody>
 
-        <tr>
-            <td>{{ row.id }}</td>
-            <td>{{ row.hostname }}</td>
-            <td>{{ row.cpu }}</td>
-            <td>{{ row.memory }}</td>
-            <td>{{ row.disk }}</td>
-            <td>{{ row.time }}</td>
-        </tr>
+            {% for row in data %}
 
-        {% endfor %}
+            <tr>
+
+                <td>
+                    {{ row['id'] }}
+                </td>
+
+                <td>
+                    {{ row['hostname'] }}
+                </td>
+
+                <td>
+                    {{ row['cpu'] }}%
+                </td>
+
+                <td>
+                    {{ row['memory'] }}%
+                </td>
+
+                <td>
+                    {{ row['disk'] }}%
+                </td>
+
+                <td class="network-value">
+                    {{ "%.2f"|format(row['network_sent'] / 1024 / 1024) }} MB
+                </td>
+
+                <td class="network-value">
+                    {{ "%.2f"|format(row['network_received'] / 1024 / 1024) }} MB
+                </td>
+
+                <td>
+                    {{ row['time'] }}
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
 
     </table>
 
-    {% else %}
 
-    <h3>No Monitoring Data Available</h3>
+    <script>
 
-    {% endif %}
+        function checkAlert() {
+
+            fetch("/alerts")
+
+                .then(response => response.json())
+
+                .then(data => {
+
+                    if (data.alert) {
+
+                        document.getElementById("alertMessage").innerText =
+                            "Host: " + data.hostname + "\n" +
+                            data.message + "\n" +
+                            "Time: " + data.time;
+
+                        document.getElementById("alertBox").style.display = "block";
+
+                    } else {
+
+                        document.getElementById("alertBox").style.display = "none";
+
+                    }
+
+                })
+
+                .catch(error => {
+
+                    console.error("Alert check failed:", error);
+
+                });
+
+        }
+
+
+        function closeAlert() {
+
+            document.getElementById("alertBox").style.display = "none";
+
+        }
+
+
+        // Check for alerts immediately
+        checkAlert();
+
+
+        // Check for new alerts every 5 seconds
+        setInterval(checkAlert, 5000);
+
+    </script>
 
 </body>
-
 </html>
