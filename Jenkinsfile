@@ -19,18 +19,19 @@ pipeline {
             }
         }
 
-stage('Test') {
-    steps {
-        sh '''
-            echo "Running application tests..."
-            if [ -d "tests" ]; then
-                ./venv/bin/python -m pytest tests/
-            else
-                echo "No tests directory found - skipping tests"
-            fi
-        '''
-    }
-}
+        stage('Test') {
+            steps {
+                sh '''
+                    echo "Running application tests..."
+                    if [ -d "tests" ]; then
+                        ./venv/bin/python -m pytest tests/
+                    else
+                        echo "No tests directory found - skipping tests"
+                    fi
+                '''
+            }
+        }
+
         stage('Security Check') {
             steps {
                 sh '''
@@ -45,36 +46,36 @@ stage('Test') {
                 echo 'Build completed successfully.'
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                sh '''
+                    docker --version
+                    docker build -t aisimdp:latest .
+                '''
+            }
+        }
+
+        stage('Docker Deploy') {
+            steps {
+                sh '''
+                    docker stop monitoring_dashboard || true
+                    docker rm monitoring_dashboard || true
+                    docker run -d \
+                        --name monitoring_dashboard \
+                        -p 5000:5000 \
+                        aisimdp:latest
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo 'CI pipeline completed successfully.'
+            echo 'CI/CD pipeline completed successfully.'
         }
-
         failure {
-            echo 'CI pipeline failed.'
+            echo 'CI/CD pipeline failed.'
         }
-    }
-}
-stage('Docker Build') {
-    steps {
-        sh '''
-            docker --version
-            docker build -t aisimdp:latest .
-        '''
-    }
-}
-
-stage('Docker Deploy') {
-    steps {
-        sh '''
-            docker stop monitoring_dashboard || true
-            docker rm monitoring_dashboard || true
-            docker run -d \
-                --name monitoring_dashboard \
-                -p 5000:5000 \
-                aisimdp:latest
-        '''
     }
 }
