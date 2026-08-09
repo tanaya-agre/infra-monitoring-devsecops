@@ -10,8 +10,7 @@ RUN apt-get update && \
 COPY dashboard/ ./dashboard/
 COPY database/ ./database/
 
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir flask
+RUN pip install --no-cache-dir flask
 
 EXPOSE 5000
 
