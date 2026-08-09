@@ -1,9 +1,23 @@
 pipeline {
     agent any
+
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('SonarCloud Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    sh '''
+                        echo "Running SonarCloud analysis..."
+                        sonar-scanner \
+                          -Dsonar.token="$SONAR_TOKEN"
+                    '''
+                }
             }
         }
 
@@ -41,14 +55,18 @@ pipeline {
                     echo "Deploying container..."
                     docker stop monitoring_dashboard || true
                     docker rm monitoring_dashboard || true
-                    docker run -d --name monitoring_dashboard -p 5000:5000 -v /home/admin/AISIMDP/database:/app/database aisimdp:latest
+                    docker run -d \
+                      --name monitoring_dashboard \
+                      -p 5000:5000 \
+                      -v /home/admin/AISIMDP/database:/app/database \
+                      aisimdp:latest
                 '''
             }
         }
 
         stage('Build Completed') {
             steps {
-                echo 'AISIMDP Docker build, security scan, and deployment completed.'
+                echo 'AISIMDP CI/CD pipeline completed successfully.'
             }
         }
     }
