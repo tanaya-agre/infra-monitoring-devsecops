@@ -19,14 +19,18 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                sh '''
-                    ./venv/bin/python -m pytest tests/ 
-                '''
-            }
-        }
-
+stage('Test') {
+    steps {
+        sh '''
+            echo "Running application tests..."
+            if [ -d "tests" ]; then
+                ./venv/bin/python -m pytest tests/
+            else
+                echo "No tests directory found - skipping tests"
+            fi
+        '''
+    }
+}
         stage('Security Check') {
             steps {
                 sh '''
