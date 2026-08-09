@@ -61,9 +61,11 @@ pipeline {
                 sh '''
                     docker stop monitoring_dashboard || true
                     docker rm monitoring_dashboard || true
+
                     docker run -d \
                         --name monitoring_dashboard \
                         -p 5000:5000 \
+                        -v "$WORKSPACE/database/monitoring.db:/app/database/monitoring.db" \
                         aisimdp:latest
                 '''
             }
@@ -74,6 +76,7 @@ pipeline {
         success {
             echo 'CI/CD pipeline completed successfully.'
         }
+
         failure {
             echo 'CI/CD pipeline failed.'
         }
