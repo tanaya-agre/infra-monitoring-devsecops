@@ -1,11 +1,9 @@
-from flask import Flask, render_template, jsonify
 import sqlite3
-import os
+from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB = os.path.join(BASE_DIR, "..", "database", "monitoring.db")
+DB = "/app/database/monitoring.db"
 
 
 @app.route("/")
@@ -14,11 +12,13 @@ def dashboard():
     conn.row_factory = sqlite3.Row
 
     cur = conn.cursor()
+
     cur.execute("""
         SELECT *
         FROM metrics
         ORDER BY id DESC
     """)
+
     data = cur.fetchall()
 
     conn.close()
@@ -47,6 +47,7 @@ def alerts():
     if alert:
         return jsonify({
             "alert": True,
+            "id": alert["id"],
             "hostname": alert["hostname"],
             "message": alert["alert"],
             "time": alert["time"]

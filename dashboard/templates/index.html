@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Infrastructure Monitoring Dashboard</title>
 
     <style>
+
         body {
             font-family: Arial, sans-serif;
             margin: 30px;
@@ -39,6 +38,7 @@
         }
 
         /* Alert Popup */
+
         #alertBox {
             display: none;
             position: fixed;
@@ -80,14 +80,18 @@
         .network-value {
             font-size: 13px;
         }
+
     </style>
+
 </head>
 
 <body>
 
     <h1>Infrastructure Monitoring Dashboard</h1>
 
+
     <!-- Alert Popup -->
+
     <div id="alertBox">
 
         <h2>🚨 Anomaly Detected</h2>
@@ -104,10 +108,13 @@
 
 
     <!-- Metrics Table -->
+
     <table>
 
         <thead>
+
             <tr>
+
                 <th>ID</th>
                 <th>Hostname</th>
                 <th>CPU (%)</th>
@@ -116,8 +123,11 @@
                 <th>Network Sent</th>
                 <th>Network Received</th>
                 <th>Timestamp</th>
+
             </tr>
+
         </thead>
+
 
         <tbody>
 
@@ -168,6 +178,20 @@
 
     <script>
 
+        /*
+         * Keeps track of the latest alert that has already
+         * been processed by this dashboard.
+         */
+        let lastAlertId = null;
+
+        /*
+         * First request is used only to establish the current
+         * alert state. Therefore old alerts will NOT popup
+         * when the dashboard is opened.
+         */
+        let firstAlertCheck = true;
+
+
         function checkAlert() {
 
             fetch("/alerts")
@@ -176,18 +200,61 @@
 
                 .then(data => {
 
-                    if (data.alert) {
+                    /*
+                     * No alert exists in the database.
+                     */
+                    if (!data.alert) {
+
+                        document.getElementById("alertBox").style.display = "none";
+
+                        return;
+                    }
+
+
+                    /*
+                     * First check after opening dashboard.
+                     *
+                     * We remember the current alert ID but do
+                     * NOT show it. This prevents old alerts from
+                     * appearing as new alerts.
+                     */
+                    if (firstAlertCheck) {
+
+                        lastAlertId = data.id;
+
+                        firstAlertCheck = false;
+
+                        console.log(
+                            "Existing alert ignored. Alert ID:",
+                            data.id
+                        );
+
+                        return;
+                    }
+
+
+                    /*
+                     * Show popup only when a NEW alert ID appears.
+                     */
+                    if (data.id !== lastAlertId) {
+
+                        lastAlertId = data.id;
+
 
                         document.getElementById("alertMessage").innerText =
                             "Host: " + data.hostname + "\n" +
                             data.message + "\n" +
                             "Time: " + data.time;
 
-                        document.getElementById("alertBox").style.display = "block";
 
-                    } else {
+                        document.getElementById("alertBox").style.display =
+                            "block";
 
-                        document.getElementById("alertBox").style.display = "none";
+
+                        console.log(
+                            "NEW ALERT DETECTED:",
+                            data.id
+                        );
 
                     }
 
@@ -195,7 +262,10 @@
 
                 .catch(error => {
 
-                    console.error("Alert check failed:", error);
+                    console.error(
+                        "Alert check failed:",
+                        error
+                    );
 
                 });
 
@@ -209,11 +279,15 @@
         }
 
 
-        // Check for alerts immediately
+        /*
+         * Check immediately when dashboard loads.
+         */
         checkAlert();
 
 
-        // Check for new alerts every 5 seconds
+        /*
+         * Check for new alerts every 5 seconds.
+         */
         setInterval(checkAlert, 5000);
 
     </script>
